@@ -14,23 +14,18 @@ int main(int argc, char **argv) {
             || strcmp(argv[1], "-h") == 0
     )) {
         cout << "Usage: " << endl
-             << "    ./console-interaction-tester SOME_BIN_TEST_SUBJECT TEST_INPUT EXPECTED_OUTPUT" 
-			 << endl;
+             << "    ./console-interaction-tester SOME_BIN_TEST_SUBJECT TEST_INPUT EXPECTED_OUTPUT" << endl;
 #ifdef _WIN32
-        cout << "Press any key..." 
-		     << endl;
+        cout << "Press any key..." << endl;
         getch();
 #endif
         return 0;
     }
     if (argc < 4) {
-        cerr << "Usage: " 
-		     << endl
-             << "    ./console-interaction-tester ./dec2bin 32 100000" 
-			 << endl;
+        cerr << "Usage: " << endl
+             << "    ./console-interaction-tester ./dec2bin 32 100000" << endl;
 #ifdef _WIN32
-        cout << "Press any key..." 
-		     << endl;
+        cout << "Press any key..." << endl;
         getch();
 #endif
         return -1;
