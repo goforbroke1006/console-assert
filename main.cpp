@@ -95,7 +95,8 @@ int main(int argc, char **argv) {
         close(outputFd[PIPE_WRITE]);
 
 //        printf("Child ready for input\n");
-        const char *input = "32\n";
+
+        const char *input = (testInput + "\n").c_str();
         write(inputFd[PIPE_WRITE], input, strlen(input));
         while (read(outputFd[PIPE_READ], &nChar, 1) == 1) {
             result += nChar;
