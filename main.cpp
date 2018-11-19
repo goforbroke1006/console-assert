@@ -84,8 +84,8 @@ int main(int argc, char **argv) {
         close(outputFd[PIPE_WRITE]);
 
         const char *szCommand = binFilename.data();
-        char *const aArguments[] = {(char *const) szCommand, NULL};
-        char *const aEnvironment[] = {NULL};
+        char *const aArguments[] = {(char *const) szCommand, nullptr};
+        char *const aEnvironment[] = {nullptr};
         int nResult = execve(szCommand, aArguments, aEnvironment);
         exit(nResult);
     } else {
