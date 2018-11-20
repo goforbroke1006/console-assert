@@ -3,8 +3,8 @@
 #include <sys/wait.h>
 #include <cstring>
 
-#define PIPE_READ 0
-#define PIPE_WRITE 1
+constexpr auto PIPE_READ = 0;
+constexpr auto PIPE_WRITE = 1;
 
 using namespace std;
 
