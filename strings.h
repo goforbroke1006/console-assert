@@ -11,7 +11,7 @@
 
 using namespace std;
 
-string trim(string str, list<string> search = {" ", "\r\n", "\n"}) {
+string trim(string str, list <string> search = {" ", "\t", "\r\n", "\n"}) {
     if (str.length() == 0) return str;
 
     list<string>::iterator match;
