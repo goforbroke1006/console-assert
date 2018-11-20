@@ -14,8 +14,6 @@ constexpr auto PIPE_WRITE = 1;
 using namespace std;
 using namespace std::chrono;
 
-constexpr int MILLISECONDS_TO_MICROSECONDS = 1000;
-
 int main(int argc, char **argv) {
 
     if (argc == 2 && (
@@ -31,7 +29,7 @@ int main(int argc, char **argv) {
     string binFilename;
     string testInput;
     string expectedOutput;
-    unsigned int timeout = 0;
+    int timeout = 0;
 
     if (argc >= 4) {
         binFilename = argv[1];
@@ -78,9 +76,7 @@ int main(int argc, char **argv) {
         exit(-1);
     }
 
-    int status;
     string result;
-    pid_t pid;
 
     milliseconds timeBefore;
     milliseconds timeAfter;
@@ -102,8 +98,6 @@ int main(int argc, char **argv) {
         close(outputFd[PIPE_READ]);
         close(outputFd[PIPE_WRITE]);
 
-        timeBefore = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-
         const char *szCommand = binFilename.data();
         char *const aArguments[] = {(char *const) binFilename.data(), nullptr};
         char *const aEnvironment[] = {nullptr};
@@ -119,36 +113,26 @@ int main(int argc, char **argv) {
         close(inputFd[PIPE_READ]);
         close(outputFd[PIPE_WRITE]);
 
-//        waitpid(childPid, &status, WNOHANG);
-//        printf("Child ready for input\n");
-
-//        if ((pid = wait(&status)) < 0) {
-//            perror("wait");
-//            exit(1);
-//        }
+        timeBefore = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
         const char *input = (testInput + "\n").c_str();
         write(inputFd[PIPE_WRITE], input, strlen(input));
         while (read(outputFd[PIPE_READ], &nChar, 1) == 1) {
             result += nChar;
         }
+
+        timeAfter = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     }
-
-//    wait(nullptr);
-
-    timeAfter = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
     const milliseconds &delta = timeAfter - timeBefore;
     if (delta.count() > timeout) {
+        cerr << "Start at: " << timeBefore.count() << endl;
+        cerr << "Stop at: " << timeAfter.count() << endl;
         cerr << "time limit exceeded (" << delta.count() << ")" << endl;
         return -1;
     }
 
     result = trim(result);
-
-//    waitpid(childPid, &status, WUNTRACED);
-//    printf("Child finish with status %d\n", status);
-//    printf("Child out data: %s\n", result.c_str());
 
     if (expectedOutput == result) {
         printf("OK\n");
