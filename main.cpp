@@ -3,6 +3,8 @@
 #include <sys/wait.h>
 #include <cstring>
 
+#include "strings.h"
+
 constexpr auto PIPE_READ = 0;
 constexpr auto PIPE_WRITE = 1;
 
@@ -12,7 +14,7 @@ int main(int argc, char **argv) {
 
     if (argc == 2 && (
             strcmp(argv[1], "?") == 0
-            || strcmp(argv[1], "help") == 0
+            || strcmp(argv[1], "--help") == 0
             || strcmp(argv[1], "-h") == 0
     )) {
         cout << "Usage: ./console-interaction-tester SOME_BIN_TEST_SUBJECT TEST_INPUT EXPECTED_OUTPUT";
@@ -64,6 +66,7 @@ int main(int argc, char **argv) {
         exit(-1);
     }
 
+//    int status = 0;
     string result;
 
     if (childPid == 0) {
@@ -84,16 +87,19 @@ int main(int argc, char **argv) {
         close(outputFd[PIPE_WRITE]);
 
         const char *szCommand = binFilename.data();
-        char *const aArguments[] = {(char *const) szCommand, nullptr};
+        char *const aArguments[] = {(char *const) binFilename.data(), nullptr};
         char *const aEnvironment[] = {nullptr};
         int nResult = execve(szCommand, aArguments, aEnvironment);
         exit(nResult);
-    } else {
+    }
+
+    if (childPid > 0) {
 //        printf("I'm paretn %d, child is %d\n", getpid(), childPid);
 
         close(inputFd[PIPE_READ]);
         close(outputFd[PIPE_WRITE]);
 
+//        waitpid(childPid, &status, WNOHANG);
 //        printf("Child ready for input\n");
 
         const char *input = (testInput + "\n").c_str();
@@ -103,13 +109,16 @@ int main(int argc, char **argv) {
         }
     }
 
-    const string &last = result.substr(result.length() - 1, 1);
-    if (last == "\n") {
-        result = result.substr(0, result.length() - 1);
-    }
+    result = trim(result);
 
-    int status = 0;
-    waitpid(childPid, &status, WUNTRACED);
+    /*if (result.length() > 0) {
+        const string &last = result.substr(result.length() - 1, 1);
+        if (last == "\n") {
+            result = result.substr(0, result.length() - 1);
+        }
+    }*/
+
+//    waitpid(childPid, &status, WUNTRACED);
 //    printf("Child finish with status %d\n", status);
 //    printf("Child out data: %s\n", result.c_str());
 
