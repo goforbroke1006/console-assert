@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
             || strcmp(argv[1], "--help") == 0
             || strcmp(argv[1], "-h") == 0
     )) {
-        cout << "Usage: ./console-interaction-tester "
+        cout << "Usage: ./console-assert "
                 "<SOME_BIN_TEST_SUBJECT> <TEST_INPUT> <EXPECTED_OUTPUT> <TIMEOUT_IN_MILLISECONDS>";
         return 0;
     }
