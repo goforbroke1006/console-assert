@@ -1,4 +1,4 @@
-# console-interaction-tester
+# console-assert
 
 Assertion tool can check actual and expected output 
 of another application.
@@ -10,7 +10,7 @@ of another application.
     
 ### Use it
 
-    $ console-interaction-tester ./dec2bin 32 10000 2000
+    $ ./console-assert ./dec2bin 32 10000 2000
 
 where 
 
