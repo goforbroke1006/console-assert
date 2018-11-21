@@ -2,31 +2,40 @@
 #include <zconf.h>
 #include <sys/wait.h>
 #include <cstring>
+#include <thread>
+#include <signal.h>
+#include <chrono>
+
+#include "strings.h"
 
 constexpr auto PIPE_READ = 0;
 constexpr auto PIPE_WRITE = 1;
 
 using namespace std;
+using namespace std::chrono;
 
 int main(int argc, char **argv) {
 
     if (argc == 2 && (
             strcmp(argv[1], "?") == 0
-            || strcmp(argv[1], "help") == 0
+            || strcmp(argv[1], "--help") == 0
             || strcmp(argv[1], "-h") == 0
     )) {
-        cout << "Usage: ./console-interaction-tester SOME_BIN_TEST_SUBJECT TEST_INPUT EXPECTED_OUTPUT";
+        cout << "Usage: ./console-assert "
+                "<SOME_BIN_TEST_SUBJECT> <TEST_INPUT> <EXPECTED_OUTPUT> <TIMEOUT_IN_MILLISECONDS>";
         return 0;
     }
 
     string binFilename;
     string testInput;
     string expectedOutput;
+    int timeout = 0;
 
     if (argc >= 4) {
         binFilename = argv[1];
         testInput = argv[2];
         expectedOutput = argv[3];
+        timeout = atoi(argv[4]);
     } else {
         cout << "Enter subject binary path: ";
         getline(cin, binFilename);
@@ -36,6 +45,9 @@ int main(int argc, char **argv) {
 
         cout << "Enter expected output: ";
         getline(cin, expectedOutput);
+
+        cout << "Timeout: ";
+        cin >> timeout;
     }
 
     int inputFd[2];
@@ -66,6 +78,9 @@ int main(int argc, char **argv) {
 
     string result;
 
+    milliseconds timeBefore;
+    milliseconds timeAfter;
+
     if (childPid == 0) {
 //        printf("I'm child %d, parent is %d\n", getpid(), getppid());
 
@@ -84,34 +99,40 @@ int main(int argc, char **argv) {
         close(outputFd[PIPE_WRITE]);
 
         const char *szCommand = binFilename.data();
-        char *const aArguments[] = {(char *const) szCommand, nullptr};
+        char *const aArguments[] = {(char *const) binFilename.data(), nullptr};
         char *const aEnvironment[] = {nullptr};
         int nResult = execve(szCommand, aArguments, aEnvironment);
         exit(nResult);
-    } else {
+    }
+
+    thread cThread;
+
+    if (childPid > 0) {
 //        printf("I'm paretn %d, child is %d\n", getpid(), childPid);
 
         close(inputFd[PIPE_READ]);
         close(outputFd[PIPE_WRITE]);
 
-//        printf("Child ready for input\n");
+        timeBefore = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
         const char *input = (testInput + "\n").c_str();
         write(inputFd[PIPE_WRITE], input, strlen(input));
         while (read(outputFd[PIPE_READ], &nChar, 1) == 1) {
             result += nChar;
         }
+
+        timeAfter = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     }
 
-    const string &last = result.substr(result.length() - 1, 1);
-    if (last == "\n") {
-        result = result.substr(0, result.length() - 1);
+    const milliseconds &delta = timeAfter - timeBefore;
+    if (delta.count() > timeout) {
+        cerr << "Start at: " << timeBefore.count() << endl;
+        cerr << "Stop at: " << timeAfter.count() << endl;
+        cerr << "time limit exceeded (" << delta.count() << ")" << endl;
+        return -1;
     }
 
-    int status = 0;
-    waitpid(childPid, &status, WUNTRACED);
-//    printf("Child finish with status %d\n", status);
-//    printf("Child out data: %s\n", result.c_str());
+    result = trim(result);
 
     if (expectedOutput == result) {
         printf("OK\n");
