@@ -17,18 +17,15 @@ namespace strings {
 
     string Trim(string s, const string &cutset = "\n\t\r ") {
         for (long i = 0; i < cutset.length(); ++i) {
-//            std::cout << s << std::endl;
 
             const char &ch = cutset.at(i);
 
             if (s.at(0) == ch) {
-//                std::cout << "Will cut from front \"" << ch << "\"" << std::endl;
                 s = s.substr(1);
                 i = -1;
                 continue;
             }
             if (s.at(s.length() - 1) == ch) {
-//                std::cout << "Will cut from back \"" << ch << "\"" << std::endl;
                 s = s.substr(0, s.length() - 1);
                 i = -1;
                 continue;

@@ -7,6 +7,7 @@
 #include <chrono>
 
 #include "strings.h"
+#include "asserts.h"
 
 constexpr auto PIPE_READ = 0;
 constexpr auto PIPE_WRITE = 1;
@@ -134,16 +135,27 @@ int main(int argc, char **argv) {
 
     result = strings::Trim(result);
 
-    if (expectedOutput == result) {
-        printf("OK\n");
-    } else {
-        fprintf(stderr,
-                "Assertion failed!\n  Expected: '%s'\n  Actual:   '%s'",
-                expectedOutput.c_str(),
-                result.c_str()
-        );
-        return -1;
+    const char *const sep = " ";
+    const auto &expectedTokens = strings::Split(expectedOutput, sep);
+    const auto &actualTokens = strings::Split(result, sep);
+
+    FILE *stream = stdout;
+    string message = "Ok";
+    int status = 0;
+
+    if (!asserts::assertVectorsEquals(expectedTokens, actualTokens)) {
+        stream = stderr;
+        message = "Fail";
+        status = -1;
     }
 
-    return 0;
+    std::cout << binFilename << " " << testInput << std::endl;
+    fprintf(stream,
+            "  Expected: '%s'\n  Actual:   '%s'\n",
+            expectedOutput.c_str(),
+            result.c_str()
+    );
+    std::cout << message << std::endl;
+
+    return status;
 }
