@@ -10,7 +10,7 @@
 
 namespace asserts {
 
-    template<class T>
+    template<typename T>
     bool assertArrayEquals(
             const T *arr1, const size_t &s1,
             const T *arr2, const size_t &s2
@@ -28,7 +28,7 @@ namespace asserts {
         return true;
     }
 
-    template<class T>
+    template<typename T>
     bool assertVectorsEquals(std::vector<T> v1, std::vector<T> v2) {
         return assertArrayEquals(v1.data(), v1.size(), v2.data(), v2.size());
     }
