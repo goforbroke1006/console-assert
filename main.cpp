@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
         close(outputFd[PIPE_READ]);
         close(outputFd[PIPE_WRITE]);
         perror("fork() error");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     string result;
@@ -85,13 +85,13 @@ int main(int argc, char **argv) {
 //        printf("I'm child %d, parent is %d\n", getpid(), getppid());
 
         if (dup2(inputFd[PIPE_READ], STDIN_FILENO) == -1) { // redirect stdin
-            exit(errno);
+            exit(EXIT_FAILURE);
         }
         if (dup2(outputFd[PIPE_WRITE], STDOUT_FILENO) == -1) { // redirect stdout
-            exit(errno);
+            exit(EXIT_FAILURE);
         }
         if (dup2(outputFd[PIPE_WRITE], STDERR_FILENO) == -1) { // redirect stderr
-            exit(errno);
+            exit(EXIT_FAILURE);
         }
         close(inputFd[PIPE_READ]);
         close(inputFd[PIPE_WRITE]);
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    result = trim(result);
+    result = strings::Trim(result);
 
     if (expectedOutput == result) {
         printf("OK\n");
